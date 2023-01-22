@@ -1,0 +1,8 @@
+[workspace]
+members = [
+	"rigc_core",
+	"rigc_parser",
+	"rigc_compiler",
+	"rigc_vm_lib",
+	"rigc_vm",
+]
