@@ -5,10 +5,16 @@ version = 3
 [[package]]
 name = "rigc_compiler"
 version = "0.1.0"
+dependencies = [
+ "rigc_core",
+]
 
 [[package]]
 name = "rigc_core"
 version = "0.1.0"
+dependencies = [
+ "rigc_parser",
+]
 
 [[package]]
 name = "rigc_parser"
@@ -17,7 +23,13 @@ version = "0.1.0"
 [[package]]
 name = "rigc_vm"
 version = "0.1.0"
+dependencies = [
+ "rigc_vm_lib",
+]
 
 [[package]]
 name = "rigc_vm_lib"
 version = "0.1.0"
+dependencies = [
+ "rigc_core",
+]
