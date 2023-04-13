@@ -1,0 +1,201 @@
+//# Module level
+	module = _{ SOI ~ (ws? ~ module_stmt)+ ~ ws? ~ EOI }
+
+	module_stmt = _{ import_stmt | type_alias_stmt | def_struct | def_class | def_function | def_variable }
+
+//# Module-related
+	import_stmt = { kw_export? ~ kw_import ~ ws ~ scoped_name ~ ws? ~ ";" }
+
+//# Classes
+	def_class = {
+		kw_export? ~ kw_class ~ ws ~ name ~ ws? ~
+		def_class_body
+	}
+		def_class_body = _{
+			"{" ~ ws? ~ (def_class_member ~ ws?)* ~ "}"
+		}
+		def_class_member = _{
+			def_class_data_member | def_class_function_member
+		}
+			def_class_data_member = {
+				unambiguous_def_var
+			}
+			def_class_function_member = {
+				unambiguous_def_function
+			}
+
+
+//# Structs
+	def_struct = {
+		kw_export? ~ kw_struct ~ ws ~ name ~ ws? ~
+		def_struct_body
+	}
+		def_struct_body = _{
+			"{" ~ ws? ~ (def_struct_member ~ ws?)* ~ "}"
+		}
+		def_struct_member = _{
+			def_struct_data_member | def_struct_function_member
+		}
+			def_struct_data_member = {
+				unambiguous_def_var
+			}
+			def_struct_function_member = {
+				unambiguous_def_function
+			}
+
+//# Aliases
+	type_alias_stmt = { kw_type ~ ws ~ name ~ ws? ~ "=" ~ ws? ~ type ~ ws? ~ ";" }
+
+//# Variables
+	def_variable		= { kw_let ~ ws ~ unambiguous_def_var }
+
+	// A variable definition without a "let " prefix.
+	// Common with the struct data member
+	unambiguous_def_var = _{ name ~ explicit_var_type? ~ ws? ~ initializer? ~ ws? ~ ";" }
+	explicit_var_type	= _{ ws? ~ ":" ~ ws? ~ type }
+	initializer			= { "=" ~ ws? ~ expr_maybe_paren }
+
+//# Functions
+	def_function = { kw_fn ~ ws ~ unambiguous_def_function }
+
+	// A function definition without a "fn " prefix.
+	// Common with the struct function member
+	unambiguous_def_function = _{ name ~ ws? ~ param_list? ~ ws? ~ return_type? ~ ws? ~ only_code_block }
+
+	param_list = { "(" ~ ws? ~ param_list_inner ~ ws? ~ ")" }
+		param_list_inner = _{ (param ~ (ws? ~ "," ~ ws? ~ param)*)? ~ ws? ~ ","? }
+		param = { name ~ ws? ~ ":" ~ ws? ~ type }
+
+	return_type = { "->" ~ ws? ~ type }
+
+//# Statements
+	if_statement			= { kw_if ~ ws? ~ "(" ~ ws? ~ expr_maybe_paren ~ ws? ~ ")" ~ ws? ~ code_block_or_statement ~ ws? ~ else_statement? }
+		else_statement		= { kw_else ~ ws? ~ code_block_or_statement }
+
+	while_statement			= { kw_while ~ ws? ~ "(" ~ ws? ~ expr_maybe_paren ~ ws? ~ ")" ~ ws? ~ code_block_or_statement }
+	for_statement			= { kw_for ~ ws? ~ "(" ~ ws? ~ expr_maybe_paren ~ ws? ~ ";" ~ ws? ~ expr ~ ws? ~ ";" ~ ws? ~ expr ~ ws? ~ ")" ~ ws? ~ code_block_or_statement }
+
+	only_code_block			= _{ code_block }
+	only_statement			= _{ statement }
+	code_block_or_statement	= _{ code_block | statement }
+	code_block				= { "{" ~ (ws? ~ code_block_or_statement)* ~ ws? ~ "}" }
+	statement				= { type_alias_stmt | if_statement | def_variable | def_function | (ws? ~ expr_maybe_paren ~ ws? ~ ";") }
+
+//# Expressions	
+	expr_list			= _{ (expr_maybe_paren ~ (ws? ~ "," ~ ws? ~ expr_maybe_paren)*)? ~ ws? ~ ","? }
+	expr_maybe_paren	= _{ expr_in_paren | expr  }
+	expr_in_paren		= _{ "(" ~ ws? ~ expr ~ ws? ~ ")" }
+	expr				= { (op_prefix ~ ws?)* ~ expr_primary ~ (ws? ~ op_postfix)* ~ (ws? ~ op_infix ~ (ws? ~ op_prefix)* ~ ws? ~ expr_primary ~ (ws? ~ op_postfix)*)*  }
+	expr_primary		= _{ li_integer | li_float | scoped_name | expr_in_paren }
+
+//# Operators
+	op_prefix		= _{ op_unary_minus | op_unary_plus | op_deref }
+	op_infix		= _{
+		op_assign		|
+		op_add_assign 	| op_add |
+		op_sub_assign 	| op_sub |
+		op_mul_assign 	| op_mul |
+		op_div_assign 	| op_div |
+		op_mod_assign 	| op_mod |
+
+		op_rel_eq		| op_rel_neq |
+		op_rel_lt 		| op_rel_gt |
+		op_rel_lte 		| op_rel_gte |
+
+		op_and			| op_or
+	}
+	op_postfix		= _{ op_func_call | op_subscript }
+
+	// Prefix
+	op_unary_minus	= { "-" }
+	op_unary_plus	= { "+" }
+	op_deref		= { "*" }
+
+	op_assign		= { "=" }
+	op_add_assign	= { "+=" }
+	op_sub_assign	= { "-=" }
+	op_mul_assign	= { "*=" }
+	op_div_assign	= { "/=" }
+	op_mod_assign	= { "%=" }
+
+	op_add			= { "+" }
+	op_sub			= { "-" }
+	op_mul			= { "*" }
+	op_div			= { "/" }
+	op_mod			= { "%" }
+
+	op_rel_eq		= { "==" }
+	op_rel_neq		= { "!=" }
+	op_rel_lt		= { "<" }
+	op_rel_gt		= { ">" }
+	op_rel_lte		= { "<=" }
+	op_rel_gte		= { ">=" }
+
+	op_and			= { "and" }
+	op_or			= { "or" }
+	op_not			= { "not" }
+
+	op_func_call	= { "(" ~ ws? ~ expr_list ~ ws? ~ ")" }
+	op_subscript	= { "[" ~ ws? ~ expr_list ~ ws? ~ "]" }
+
+//# Literals
+	li_integer				= { digit+ ~ li_integer_width? }
+		li_integer_width	= _{ "i16" | "i32" | "i64" | "u16" | "u32" | "u64" }
+
+	li_float				= { li_float_int | li_float_full | li_float_dot }
+		li_float_int		= _{ digit+ ~ ("f" | "F") } // e.g: 0f
+		li_float_full		= _{ digit+ ~ "." ~ digit* ~ ("f" | "F")? } // e.g: 0.0f, 0.F
+		li_float_dot		= _{ "." ~ digit+ ~ ("f" | "F")? } // e.g: .0f
+
+//# Identifiers
+	scoped_name = { name ~ ("::" ~ name)* }
+
+	name = { ident }
+	type = { ident }
+
+	ident = _{ alpha ~ (alpha | digit)* }
+
+//# Keywords
+	kw_mod		= _{ "mod" ~ &!alnum }
+	kw_let		= _{ "let" ~ &!alnum }
+	kw_fn		= _{ "fn" ~ &!alnum }
+	kw_ret		= _{ "ret" ~ &!alnum }
+	kw_if		= _{ "if" ~ &!alnum }
+	kw_else		= _{ "else" ~ &!alnum }
+	kw_while	= _{ "while" ~ &!alnum }
+	kw_for		= _{ "for" ~ &!alnum }
+	kw_import	= _{ "import" ~ &!alnum }
+	kw_export	= _{ "export" ~ &!alnum }
+	kw_type		= _{ "type" ~ &!alnum }
+	kw_struct	= _{ "struct" ~ &!alnum }
+	kw_class	= _{ "class" ~ &!alnum }
+	kw_null		= _{ "null" ~ &!alnum }
+	kw_of		= _{ "of" ~ &!alnum }
+	kw_in		= _{ "in" ~ &!alnum }
+	kw_as		= _{ "as" ~ &!alnum }
+	// Access specifiers
+	kw_pub		= _{ "pub" ~ &!alnum }
+	kw_priv		= _{ "priv" ~ &!alnum }
+	kw_prot		= _{ "prot" ~ &!alnum }
+
+	// Boolean & conditionals
+	kw_true		= _{ "true" ~ &!alnum }
+	kw_false	= _{ "false" ~ &!alnum }
+	kw_and		= _{ "and" ~ &!alnum }
+	kw_or		= _{ "or" ~ &!alnum }
+	kw_not		= _{ "not" ~ &!alnum }
+	kw_xor		= _{ "xor" ~ &!alnum }
+	kw_is		= _{ "is" ~ &!alnum }
+
+//# Minimal tokens
+	alpha	= _{ 'a'..'z' | 'A'..'Z' | "_" }
+	digit	= _{ '0'..'9' }
+	alnum	= _{ alpha | digit }
+
+	// New line
+	nl		= _{ "\r\n" | "\r" | "\n" }
+
+	comment	= _{ "//" ~ (!nl ~ ANY)* ~ nl? }
+
+	// Any kind of whitespace or comment
+	ws		= _{ (" " | "\t" | nl | comment )+ }
