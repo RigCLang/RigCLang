@@ -98,6 +98,8 @@ pub fn parse_expr(pairs: Pairs<Rule>) -> Expression {
         .map_primary(|primary| match primary.as_rule() {
             Rule::li_integer => Expression::Atom(primary),
             Rule::li_float => Expression::Atom(primary),
+            Rule::li_string => Expression::Atom(primary),
+            Rule::li_character => Expression::Atom(primary),
             Rule::scoped_name => Expression::Atom(primary),
             Rule::expr => parse_expr(primary.into_inner()),
             rule => unreachable!("Expression::parse expected atom, found {:?}", rule),
@@ -113,6 +115,12 @@ pub fn parse_expr(pairs: Pairs<Rule>) -> Expression {
             Expression::PrefixOperator {
                 op,
                 right: Box::new(rhs)
+            }
+        )
+        .map_postfix(|lhs, op| 
+            Expression::PostfixOperator {
+                left: Box::new(lhs),
+                op
             }
         )
         .parse(pairs)
