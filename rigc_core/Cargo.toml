@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 rigc_parser = { path = "../rigc_parser" }
+pest = "2.5.3"
