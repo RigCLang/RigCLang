@@ -6,8 +6,8 @@ A simple and flexible native language that compiles to C.
 
 ```rigc
 fn main {
-	var world = "World";
-	print("Hello, {}!", world);
+    var world = "World";
+    print("Hello, {}!", world);
 }
 ```
 
@@ -19,16 +19,16 @@ fn main {
 
 ```rigc
 fn main {
-	var name: String;
-	var age: Int;
-	println("Please enter your name and age (example: John 20): ");
-	scan_input("{} {}", name, age);
+    var name: String;
+    var age: Int;
+    println("Please enter your name and age (example: John 20): ");
+    scan_input("{} {}", name, age);
 
-	if (age >= 18) {
-		println("Hello, {}! You are an adult.", name);
-	} else {
-		println("Hello, {}! You are a minor.", name);
-	}
+    if (age >= 18) {
+        println("Hello, {}! You are an adult.", name);
+    } else {
+        println("Hello, {}! You are a minor.", name);
+    }
 }
 ```
 
@@ -36,18 +36,18 @@ fn main {
 
 ```rigc
 fn fib(n: Int) -> Int {
-	if (n <= 1) {
-		return n;
-	} else {
-		return fib(n - 1) + fib(n - 2);
-	}
+    if (n <= 1) {
+        return n;
+    } else {
+        return fib(n - 1) + fib(n - 2);
+    }
 }
 
 fn main {
-	println("Please enter a number: ");
-	let n = Int.try_parse( input("{}", n) )?;
+    println("Please enter a number: ");
+    let n = Int.try_parse( input("{}", n) )?;
 
-	println("Fibonacci of {} is {}.", n, fib(n));
+    println("Fibonacci of {} is {}.", n, fib(n));
 }
 ```
 
@@ -55,10 +55,10 @@ fn main {
 
 ```rigc
 fn main {
-	var items = Array(["Apple", "Banana", "Orange"]);
-	for (item in items) {
-		println("Item: {}", item);
-	}
+    var items = Array(["Apple", "Banana", "Orange"]);
+    for (item in items) {
+        println("Item: {}", item);
+    }
 }
 ```
 
@@ -66,22 +66,22 @@ fn main {
 
 ```rigc
 class Person {
-	var name: String;
-	var age: Int;
+    var name: String;
+    var age: Int;
 
-	construct(name: String, age: Int) {
-		this.name = name;
-		this.age = age;
-	}
+    construct(name: String, age: Int) {
+        this.name = name;
+        this.age = age;
+    }
 
-	greet {
-		println("Hello, {}! You are {} years old.", this.name, this.age);
-	}
+    greet {
+        println("Hello, {}! You are {} years old.", this.name, this.age);
+    }
 }
 
 fn main {
-	var person = Person("John", 20);
-	person.greet();
+    var person = Person("John", 20);
+    person.greet();
 }
 ```
 
