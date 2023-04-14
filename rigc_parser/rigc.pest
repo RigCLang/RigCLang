@@ -86,7 +86,7 @@
 	expr_maybe_paren	= _{ expr_in_paren | expr  }
 	expr_in_paren		= _{ "(" ~ ws? ~ expr ~ ws? ~ ")" }
 	expr				= { (op_prefix ~ ws?)* ~ expr_primary ~ (ws? ~ op_postfix)* ~ (ws? ~ op_infix ~ (ws? ~ op_prefix)* ~ ws? ~ expr_primary ~ (ws? ~ op_postfix)*)*  }
-	expr_primary		= _{ li_integer | li_float | scoped_name | expr_in_paren }
+	expr_primary		= _{ li_integer | li_float | li_string | li_character | scoped_name | expr_in_paren }
 
 //# Operators
 	op_prefix		= _{ op_unary_minus | op_unary_plus | op_deref }
@@ -146,6 +146,13 @@
 		li_float_int		= _{ digit+ ~ ("f" | "F") } // e.g: 0f
 		li_float_full		= _{ digit+ ~ "." ~ digit* ~ ("f" | "F")? } // e.g: 0.0f, 0.F
 		li_float_dot		= _{ "." ~ digit+ ~ ("f" | "F")? } // e.g: .0f
+
+	li_string				= { "\"" ~ (li_string_char | li_string_escape)* ~ "\"" }
+		li_string_char		= _{ !("\\" | "\"") ~ ANY }
+		li_string_escape	= _{ "\\" ~ li_string_escape_char }
+			li_string_escape_char	= _{ "n" | "r" | "t" | "\\" | "\"" }
+
+	li_character			= { "'" ~ (li_string_char | li_string_escape) ~ "'" }
 
 //# Identifiers
 	scoped_name = { name ~ ("::" ~ name)* }
