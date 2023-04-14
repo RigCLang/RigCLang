@@ -3,6 +3,8 @@ mod imports;
 mod analysis;
 mod generation;
 
+use generation as gen;
+
 
 // Imports:
 use crate::imports::*;
@@ -12,43 +14,53 @@ use rigc_core::module::Module;
 // Constants
 const VERSION: &str = "0.0.1";
 
-fn analyze(content: String) -> Pin<Box<Module>> {
-    use analysis::functions::*;
-    use analysis::structures::*;
 
+fn handle_func_def(token: RulePair, module: Pin<&mut Module>, content: &'static str) {
+    use analysis::functions::*;
+    let f = analyze_function_definition(token);
+
+    let mut func = module.register_function(
+        f.name.start,
+        f.name.end
+    );
+
+    unsafe {
+        func.as_mut().set_return_type(&content[f.return_type.start..f.return_type.end]);
+    }
+}
+
+fn handle_struct_def(token: RulePair, module: Pin<&mut Module>) {
+    use analysis::structures::*;
+    let s = analyze_structure_definition(token);
+
+    module.register_structure(
+        s.name.start,
+        s.name.end
+    );
+}
+
+fn analyze(content: String) -> Pin<Box<Module>> {
     let mut module = Module::new(content);
 
     let content = module.as_ref().content_as_static();
     let parse_result = rigc_parser::parse(&content)
         .expect("Failed to parse input module");
 
-    for token in parse_result {
+    for token in parse_result.clone() {
         if token.as_rule() == Rule::def_function {
-            let f = analyze_function_definition(token);
-
-            let mut func = module.as_mut().register_function(
-                f.name.start,
-                f.name.end
-            );
-
-            unsafe {
-                func.as_mut().set_return_type(&content[f.return_type.start..f.return_type.end]);
-            }
+            handle_func_def(token, module.as_mut(), content);
         }
         else if token.as_rule() == Rule::def_struct {
-            let s = analyze_structure_definition(token);
-
-            module.as_mut().register_structure(
-                s.name.start,
-                s.name.end
-            );
+            handle_struct_def(token, module.as_mut());
         }
+    }
+
+    for pair in parse_result {
+        rigc_parser::display_parse_result(&pair);
     }
     
     module
 }
-
-
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -71,15 +83,9 @@ fn main() {
         println!("Found function: {}", function.name());
     }
 
-    let code = generation::generate_c_code(&module);
+    let code = gen::c_code::generate(&module);
 
-    // write it to out.c file
     use std::fs::write as write_file;
     write_file("out.c", code.as_bytes())
         .expect("Failed to write output file!");
-
-
-    // for pair in parse {
-    //     rigc_parser::display_parse_result(&pair.into());
-    // }
 }

@@ -6,5 +6,5 @@ extern crate pest;
 pub use rigc_parser::Rule;
 
 // Types:
-pub type Token<'l> = pest::iterators::Pair<'l, Rule>;
+pub type RulePair<'l> = pest::iterators::Pair<'l, Rule>;
 

@@ -10,7 +10,7 @@ pub(crate) struct FoundFunction {
 	pub(crate) return_type: TextSpan,
 }
 
-fn search_function_name<'t>(token: &Token<'t>) -> TextSpan {
+fn search_function_name<'t>(token: &RulePair<'t>) -> TextSpan {
 	let name = find_token_of_type(token, Rule::name);
 
 	if name.is_none() {
@@ -21,7 +21,7 @@ fn search_function_name<'t>(token: &Token<'t>) -> TextSpan {
 	return TextSpan::new(span.start(), span.end());
 }
 
-fn search_function_return_type<'t>(token: &Token<'t>) -> TextSpan {
+fn search_function_return_type<'t>(token: &RulePair<'t>) -> TextSpan {
 	let return_type = find_token_of_type(token, Rule::return_type);
 
 	if return_type.is_none() {
@@ -38,7 +38,7 @@ fn search_function_return_type<'t>(token: &Token<'t>) -> TextSpan {
 	return TextSpan::new(span.start(), span.end());
 }
 
-pub(crate) fn analyze_function_definition<'t>(token: Token<'t>) -> FoundFunction {
+pub(crate) fn analyze_function_definition<'t>(token: RulePair<'t>) -> FoundFunction {
     let name = search_function_name(&token);
 	let return_type = search_function_return_type(&token);
     

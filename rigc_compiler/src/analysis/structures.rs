@@ -9,7 +9,7 @@ pub(crate) struct FoundStructure {
     pub(crate) name: TextSpan,
 }
 
-fn search_structure_name<'t>(token: &Token<'t>) -> TextSpan {
+fn search_structure_name<'t>(token: &RulePair<'t>) -> TextSpan {
 	let name = find_token_of_type(token, Rule::name);
 
 	if name.is_none() {
@@ -20,7 +20,7 @@ fn search_structure_name<'t>(token: &Token<'t>) -> TextSpan {
 	return TextSpan::new(span.start(), span.end());
 }
 
-pub(crate) fn analyze_structure_definition<'t>(token: Token<'t>) -> FoundStructure {
+pub(crate) fn analyze_structure_definition<'t>(token: RulePair<'t>) -> FoundStructure {
     let name = search_structure_name(&token);
     
     FoundStructure {
