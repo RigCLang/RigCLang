@@ -44,7 +44,7 @@
 			}
 
 //# Aliases
-	type_alias_stmt = { kw_type ~ ws ~ name ~ ws? ~ "=" ~ ws? ~ type ~ ws? ~ ";" }
+	type_alias_stmt = { kw_type ~ ws ~ name ~ ws? ~ "=" ~ ws? ~ type_ ~ ws? ~ ";" }
 
 //# Variables
 	def_variable		= { kw_let ~ ws ~ unambiguous_def_var }
@@ -52,7 +52,7 @@
 	// A variable definition without a "let " prefix.
 	// Common with the struct data member
 	unambiguous_def_var = _{ name ~ explicit_var_type? ~ ws? ~ initializer? ~ ws? ~ ";" }
-	explicit_var_type	= _{ ws? ~ ":" ~ ws? ~ type }
+	explicit_var_type	= _{ ws? ~ ":" ~ ws? ~ type_ }
 	initializer			= { "=" ~ ws? ~ expr_maybe_paren }
 
 //# Functions
@@ -64,9 +64,9 @@
 
 	param_list = { "(" ~ ws? ~ param_list_inner ~ ws? ~ ")" }
 		param_list_inner = _{ (param ~ (ws? ~ "," ~ ws? ~ param)*)? ~ ws? ~ ","? }
-		param = { name ~ ws? ~ ":" ~ ws? ~ type }
+		param = { name ~ ws? ~ ":" ~ ws? ~ type_ }
 
-	return_type = { "->" ~ ws? ~ type }
+	return_type = { "->" ~ ws? ~ type_ }
 
 //# Statements
 	if_statement			= { kw_if ~ ws? ~ "(" ~ ws? ~ expr_maybe_paren ~ ws? ~ ")" ~ ws? ~ code_block_or_statement ~ ws? ~ else_statement? }
@@ -151,7 +151,7 @@
 	scoped_name = { name ~ ("::" ~ name)* }
 
 	name = { ident }
-	type = { ident }
+	type_ = { ident }
 
 	ident = _{ alpha ~ (alpha | digit)* }
 
@@ -166,7 +166,7 @@
 	kw_for		= _{ "for" ~ &!alnum }
 	kw_import	= _{ "import" ~ &!alnum }
 	kw_export	= _{ "export" ~ &!alnum }
-	kw_type		= _{ "type" ~ &!alnum }
+	kw_type		= _{ "type_" ~ &!alnum }
 	kw_struct	= _{ "struct" ~ &!alnum }
 	kw_class	= _{ "class" ~ &!alnum }
 	kw_null		= _{ "null" ~ &!alnum }

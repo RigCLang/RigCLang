@@ -1,4 +1,5 @@
 pub mod functions;
+pub mod structures;
 pub mod module;
 
 pub fn add(left: usize, right: usize) -> usize {
